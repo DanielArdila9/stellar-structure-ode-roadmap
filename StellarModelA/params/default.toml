@@ -1,0 +1,40 @@
+# ================================
+# Stellar Structure ODE - Parámetros por defecto
+# Unidades: cgs (cm, g, s)
+# EOS: P = K * rho^gamma
+# ================================
+
+[physical]
+G   = 6.6743e-8        # Constante gravitacional [cm^3 g^-1 s^-2]
+
+[eos]
+K       = 1.0e14       # Constante politrópica K [cgs]
+gamma   = 1.6666666667 # Índice politrópico γ (=5/3 para gas degenerado no relativista)
+
+[ic]                    # Condiciones iniciales cerca de r=0
+r0     = 1.0e4         # Radio inicial pequeño para evitar singularidad [cm]
+rho_c  = 1.0e6         # Densidad central ρc [g/cm^3]
+
+[stop]                  # Criterios de parada
+epsilon = 1.0e-6       # Umbral de densidad para "superficie" (ρ -> ε) [g/cm^3]
+rmax    = 1.5e11       # Techo por seguridad; el callback cortará antes [cm]
+
+[solver]
+algo        = "Tsit5"  # Nombre del método (Tsit5, DP5, Vern7, Rosenbrock23, etc.)
+abstol      = 1.0e-10  # Tolerancia absoluta
+reltol      = 1.0e-8   # Tolerancia relativa
+save_everystep = false # Guardar cada paso del integrador
+saveat      = "auto"   # "auto" -> malla log por década; o número/array de r explícito
+
+[output_grid]
+points_per_decade = 80 # Si saveat="auto": puntos por década en r
+
+[sweep]
+Ks     = [3.16e13, 5.31e13, 8.91e13, 1.50e14, 2.51e14, 4.22e14, 7.08e14, 1.19e15, 2.00e15]
+gammas = [1.25, 1.30, 1.33, 1.40, 1.50, 1.60, 1.6666666667]
+rho_cs = [10, 25, 50, 100, 200, 400, 800]
+use_threads = false     # Paralelizar barrido
+
+[run]
+mode = "single"         # "single" para 1 corrida con (K,γ,ρc) de arriba; "sweep" usa [sweep]
+seed = 42               # Semilla si se usa aleatoriedad en mallas/salidas
