@@ -8,54 +8,54 @@ function _ensure_plots()
     end
     return nothing
 end
-
-raw"""
-    plot_profiles(res::ModelAResult; logρ=false) -> (pρ, pM)
-"""
-function plot_profiles(res::ModelAResult; logρ::Bool=false)
+function plot_profiles(res::ModelAResult; logρ::Bool=false, norm_r::Bool=false)
     _ensure_plots()
-    rr, MM, rrho = res.r, res.M, res.ρ
+    rr   = norm_r ? res.r ./ res.R : res.r
+    MM   = res.M
+    rrho = res.ρ
+
+    xlabel_r = norm_r ? "r̂ = r/R" : "r [cm]"
 
     pρ = Plots.plot(rr, rrho;
         lw=2, label="ρ(r)",
-        xlabel="r [cm]", ylabel="ρ [g cm⁻³]",
-        yscale = (logρ ? :log10 : :identity),
-        title = "Density profile"
+        xlabel=xlabel_r, ylabel="ρ [g cm⁻³]",
+        yscale=(logρ ? :log10 : :identity),
+        title="Density profile"
     )
 
     pM = Plots.plot(rr, MM;
         lw=2, label="M(r)",
-        xlabel="r [cm]", ylabel="M [g]",
-        title = "Enclosed mass"
+        xlabel=xlabel_r, ylabel="M [g]",
+        title="Enclosed mass"
     )
 
     display(pρ); display(pM)
     return pρ, pM
 end
 
-raw"""
-    plot_overlaid(results::Vector{ModelAResult};
-                  which=:rho, logρ=false,
-                  lbl = res -> "ρc=$(res.params.ic.ρc)") -> p
-"""
+
 function plot_overlaid(results::Vector{ModelAResult};
                        which::Symbol=:rho, logρ::Bool=false,
+                       norm_r::Bool=false,
                        lbl = res -> "ρc=$(res.params.ic.ρc)")
     _ensure_plots()
 
+    xlabel_r = norm_r ? "r̂ = r/R" : "r [cm]"
+
     if which === :rho
         p = Plots.plot(title="Density profiles",
-                       xlabel="r [cm]", ylabel="ρ [g cm⁻³]",
-                       yscale = (logρ ? :log10 : :identity))
+                       xlabel=xlabel_r, ylabel="ρ [g cm⁻³]",
+                       yscale=(logρ ? :log10 : :identity))
         for res in results
-            rr, rrho = res.r, res.ρ
+            rr   = norm_r ? res.r ./ res.R : res.r
+            rrho = res.ρ
             Plots.plot!(p, rr, rrho; lw=2, label=lbl(res))
         end
     elseif which === :mass
         p = Plots.plot(title="Mass profiles",
-                       xlabel="r [cm]", ylabel="M [g]")
+                       xlabel=xlabel_r, ylabel="M [g]")
         for res in results
-            rr, MM = res.r, res.M
+            rr, MM = norm_r ? (res.r ./ res.R, res.M) : (res.r, res.M)
             Plots.plot!(p, rr, MM; lw=2, label=lbl(res))
         end
     else
