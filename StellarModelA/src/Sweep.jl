@@ -85,6 +85,9 @@ function sweep_summary(results::Vector{ModelAResult})
         K      = res.params.phys.K,
         γ      = res.params.phys.γ,
         ρc     = res.params.ic.ρc,
-        status = get(res.meta, :status, "unknown")
+        rho_mean = 3*res.Mstar / (4π*res.R^3),
+        ratio    = res.params.ic.ρc / (3*res.Mstar / (4π*res.R^3)),
+        status = get(res.params, :status, "unknown")
     ) for res in results]
 end
+
