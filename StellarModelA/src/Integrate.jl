@@ -8,8 +8,8 @@
 """
     surface_callback(ε::Float64)
 
-ContinuousCallback que detiene la integración cuando ρ(r) cruza ε (>0).
-Asume estado u = [M, ρ].
+ContinuousCallback that stops the integration when ρ(r) crosses ε (>0).
+Assumes state vector u = [M, ρ].
 """
 function surface_callback(ε::Float64)
     @assert ε > 0 "ε must be > 0"
@@ -25,11 +25,11 @@ end
 """
     build_problem(phys::PhysParams, ic::ICParams, stop::StopParams)
 
-Construye un `ODEProblem` para Model A en (r0, rmax) con u0 regularizado.
-Pasa `phys` como `p` para evitar closures.
+Builds an `ODEProblem` for Model A over (r0, rmax) with a regularized u0.
+Passes `phys` as `p` to avoid closures.
 """
 function build_problem(phys::PhysParams, ic::ICParams, stop::StopParams)
-    # guardas rápidas (ayudan a fallar temprano)
+    # quick guards (fail fast if something is invalid)
     @assert phys.K  > 0                "K must be > 0"
     @assert phys.γ  > 1                "γ must be > 1"
     @assert ic.r0   > 0                "r0 must be > 0"
@@ -39,9 +39,9 @@ function build_problem(phys::PhysParams, ic::ICParams, stop::StopParams)
     u0    = regularized_u0(ic)
     rspan = (ic.r0, stop.rmax)
 
-    # Usa directamente modelA!(du,u,p,r) con p=phys
+    # Directly use modelA!(du,u,p,r) with p=phys
     prob = ODEProblem(modelA!, u0, rspan, phys;
-                      # evita que el solver avance a estados físicamente inválidos
+                      # prevent the solver from stepping into unphysical states
                       isoutofdomain = (u,p,r)->(u[2] < 0.0))
     return prob
 end
@@ -54,12 +54,12 @@ end
     integrate_modelA(phys::PhysParams, ic::ICParams,
                      stop::StopParams, num::SolveParams) :: ModelAResult
 
-Integra hacia afuera desde r0 hasta que ρ ≈ ε (superficie) o rmax.
-Devuelve `ModelAResult` con (R, M(R)) y perfiles muestreados.
+Integrates outward from r0 until ρ ≈ ε (surface) or rmax.
+Returns a `ModelAResult` with (R, M(R)) and sampled profiles.
 
-Política de muestreo:
-- Si `num.saveat === nothing`, se resuelve ligero y luego se **post-muestrea en malla log**.
-- Si `num.saveat` es un vector, se usa directamente durante la integración.
+Sampling policy:
+- If `num.saveat === nothing`, solve lightly and **post-sample on a log grid**.
+- If `num.saveat` is a vector, use it directly during integration.
 """
 function integrate_modelA(phys::PhysParams, ic::ICParams,
                           stop::StopParams, num::SolveParams)::ModelAResult
@@ -67,10 +67,10 @@ function integrate_modelA(phys::PhysParams, ic::ICParams,
     prob = build_problem(phys, ic, stop)
     cb   = surface_callback(stop.ε)
 
-    # ¿Trae saveat explícito?
+    # Does it have an explicit saveat?
     has_saveat = !(num.saveat === nothing)
 
-    # Resolver
+    # Solve
     sol = has_saveat ?
         solve(prob, num.solver; callback=cb,
               abstol=num.abstol, reltol=num.reltol,
@@ -79,33 +79,33 @@ function integrate_modelA(phys::PhysParams, ic::ICParams,
               abstol=num.abstol, reltol=num.reltol,
               save_everystep=false)
 
-    # Radio y estado final
+    # Final radius and state
     R  = sol.t[end]
     uR = sol.u[end]
     Mstar, ρR = uR[1], uR[2]
 
-    # Perfilería: usa directamente lo guardado o post-muestreo log
+    # Profiles: either use saved steps or log post-sampling
     if has_saveat
         r_samp = sol.t
         M_samp = getindex.(sol.u, 1)
         ρ_samp = getindex.(sol.u, 2)
     else
-        # malla logarítmica adaptativa: puntos_por_decada * décadas
+        # logarithmic adaptive mesh: points_per_decade * decades
         decades = max(1.0, log10(R/ic.r0))
-        puntos_por_decada = 80                 # ajustable
-        npts = Int(clamp(round(decades * puntos_por_decada), 200, 4000))
+        points_per_decade = 80                 # adjustable
+        npts = Int(clamp(round(decades * points_per_decade), 200, 4000))
         r_samp = exp10.(range(log10(ic.r0), log10(R), length=npts))
-        # usa interpolación del sol
+        # interpolate solution on the log grid
         M_samp = [sol(r)[1] for r in r_samp]
         ρ_samp = [sol(r)[2] for r in r_samp]
     end
 
-    # Estado/metadata
+    # Status/metadata
     status_str = try
-        # ReturnCode.Terminated si cortó por callback
+        # ReturnCode.Terminated if it stopped by callback
         (sol.retcode == ReturnCode.Terminated) ? "surface" : string(sol.retcode)
     catch
-        # compat si ReturnCode no está en scope
+        # fallback if ReturnCode is not in scope
         ρR ≈ stop.ε ? "surface" : "ended"
     end
 
