@@ -1,15 +1,15 @@
 # Stellar Structure ODE Roadmap
 
-Numerical experiments with **stellar structure equations** using ODE solvers and a polytropic equation of state (EOS).  
+Numerical experiments with **stellar structure equations** using ODE solvers and a polytropic equation of state (EOS).
 
 We study a simplified star model (**Model A**) where mass and density evolve as:
 
-\[
-\frac{dM}{dr} = 4\pi r^2 \rho, \qquad 
-\frac{d\rho}{dr} = - \frac{G M}{K \gamma r^2}\, \rho^{\,2-\gamma}.
-\]
+$$
+\frac{dM}{dr} = 4\pi r^2 \rho,\qquad
+\frac{d\rho}{dr} = - \frac{G M}{K \gamma r^2}\, \rho^{2-\gamma}.
+$$
 
-Integration starts at a small radius r0 with regularized central conditions and stops automatically at the stellar surface (\(\rho \to 0\)).  
+Integration starts at a small radius r0 with regularized central conditions and stops automatically at the stellar surface ($\rho \to 0$).
 
 ---
 
@@ -53,9 +53,9 @@ Perform systematic parameter scans and sensitivity tests:
 julia --project=. scripts/run_modelA_param_scan.jl
 ```
 Outputs:
-- `summary_scan.csv` → Table with (K, γ, ρc) → (R, M*, ρ̄, ρc/ρ̄)  
-- `sensitivity_r0_tols.csv` → Stability results vs. r0, abstol, reltol  
-- `plots/` → Comparison plots of ρ(r) and M(r) across parameter sets  
+- `summary_scan.csv` → Table with (K, γ, ρc) → (R, M*, ρ̄, ρc/ρ̄)
+- `sensitivity_r0_tols.csv` → Stability results vs. r0, abstol, reltol
+- `plots/` → Comparison plots of ρ(r) and M(r) across parameter sets
 
 ---
 
@@ -67,10 +67,10 @@ Outputs:
 - Verified monotone M(r) growth and physically plausible ρ(r).
 
 **Milestone 2 (Weeks 3–4): Parameter Scans and Diagnostics**
-- Scanned γ ∈ {1.3, 1.5, 5/3} and multiple K values.  
-- Tabulated surface radius R, stellar mass M*, mean density ρ̄, and ratio ρc/ρ̄.  
-- Performed sensitivity studies on r0 and solver tolerances.  
-- Generated comparison plots across parameter sets.  
+- Scanned γ ∈ {1.3, 1.5, 5/3} and multiple K values.
+- Tabulated surface radius R, stellar mass M*, mean density ρ̄, and ratio ρc/ρ̄.
+- Performed sensitivity studies on r0 and solver tolerances.
+- Generated comparison plots across parameter sets.
 
 ---
 
@@ -93,8 +93,8 @@ julia> ]instantiate
 
 ## Reproducibility
 
-- Default parameters are stored in `params/default.toml`.  
-- All outputs (CSVs, plots) are timestamped and saved under `StellarModelA/datasets/`.  
+- Default parameters are stored in `params/default.toml`.
+- All outputs (CSVs, plots) are timestamped and saved under `StellarModelA/datasets/`.
 - Run scripts directly from `scripts/` to reproduce each milestone’s deliverables.
 
 ---
