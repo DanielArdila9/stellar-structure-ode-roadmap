@@ -1,6 +1,6 @@
 # Stellar Structure ODE Roadmap
 
-Numerical experiments with **stellar structure equations** using ODE solvers and a polytropic equation of state (EOS).
+Numerical experiments with stellar structure equations using ODE solvers and a polytropic equation of state (EOS).
 
 We study a simplified star model (**Model A**) where mass and density evolve as:
 
