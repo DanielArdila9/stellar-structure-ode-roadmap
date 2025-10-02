@@ -12,13 +12,14 @@ __pycache__/
 Manifest.toml
 
 
-# Ignore CSV/PNG everywhere except in datasets/
+# Ignore CSV/PNG everywhere
 *.csv
 *.png
 
-# But keep datasets (negate ignore rules)
-!datasets/**/*.csv
-!datasets/**/*.png
+# But keep datasets (inside StellarModelA)
+!StellarModelA/datasets/**/*.csv
+!StellarModelA/datasets/**/*.png
+
 
 # OS junk
 .DS_Store
