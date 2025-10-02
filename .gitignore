@@ -11,10 +11,14 @@ __pycache__/
 *.jl.mem
 Manifest.toml
 
-# Results / figures
-output/
+
+# Ignore CSV/PNG everywhere except in datasets/
 *.csv
 *.png
+
+# But keep datasets (negate ignore rules)
+!datasets/**/*.csv
+!datasets/**/*.png
 
 # OS junk
 .DS_Store
