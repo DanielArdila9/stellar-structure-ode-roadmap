@@ -7,7 +7,7 @@ using Plots
 
 # Define parameter grids
 Ks   = [1e14, 2e14, 5e14]       # try three values of K
-γs   = [5/3]                    # fix γ
+γs   = [1.3,1.5,5/3]                    # fix γ
 ρcs  = [50.0, 100.0, 200.0]     # vary central density
 
 # Run sweep
